@@ -45,5 +45,5 @@ jobs:
           uses: visma-prodsec/coverity-on-polaris-workflow@v1
           with:
             api_url: ${{ vars.COVERITY_ON_POLARIS_API_URL }}
-            access_token: ${{ secrets.VISMAINDEX_POLARIS_ACCESS_TOKEN }}
+            access_token: ${{ secrets.COVERITY_ON_POLARIS_ACCESS_TOKEN }}
 ```
