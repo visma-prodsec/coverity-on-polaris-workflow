@@ -1,0 +1,38 @@
+name: Coverity on Polaris SAST
+description: Run Coverity on Polaris static application security test
+
+inputs:
+  api_url:
+    description: |
+      Coverity on Polaris API URL
+      Usually something along the lines of https://{instance_name}.polaris.synopsys.com
+    required: true
+  access_token:
+    description: 'Polaris access token'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - if: runner.os == 'Linux'
+      shell: bash
+      env:
+        DOTNET_NOLOGO: 1
+        DOTNET_CLI_TELEMETRY_OPTOUT: 1
+        POLARIS_ACCESS_TOKEN: ${{ inputs.access_token }}
+        GIT_BRANCH: ${{ github.ref_name }}
+      run: |
+        echo Downloading Polaris CLI
+        wget -q ${{ inputs.api_url }}/api/tools/v2/downloads/polaris_cli-linux64.zip
+        echo Unzipping Polaris CLI
+        unzip -j polaris_cli-linux64.zip -d /tmp/polari_cli
+        echo Removing archive
+        unlink polaris_cli-linux64.zip
+        echo Starting analysis
+        /tmp/polari_cli/polaris analyze --upload-local-config
+        echo Removing Polaris CLI
+        rm -rf /tmp/polari_cli
+
+branding:
+  icon: 'shield'
+  color: 'purple'
