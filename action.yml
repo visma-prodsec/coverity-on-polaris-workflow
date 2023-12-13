@@ -33,6 +33,27 @@ runs:
         echo Removing Polaris CLI
         rm -rf /tmp/polari_cli
 
+    - if: runner.os == 'Windows'
+      shell: pwsh
+      env:
+        DOTNET_NOLOGO: 1
+        DOTNET_CLI_TELEMETRY_OPTOUT: 1
+        POLARIS_ACCESS_TOKEN: ${{ inputs.access_token }}
+      run: |
+        Write-Host "Downloading Polaris CLI"
+        $polarisCliZipPath = Join-Path $env:TEMP "polaris_cli-win64.zip"
+        Invoke-WebRequest -Uri "${{ inputs.api_url }}/api/tools/v2/downloads/polaris_cli-win64.zip" -OutFile $polarisCliZipPath
+
+        Write-Host "Unzipping Polaris CLI"
+        $polarisCliUnzipPath = Join-Path $env:TEMP "polaris_cli"
+        Expand-Archive -Path $polarisCliZipPath -DestinationPath $polarisCliUnzipPath
+
+        Write-Host "Running Polaris Analysis"
+        & (Get-ChildItem -Path $polarisCliUnzipPath -Recurse -Filter polaris.exe | Select-Object -First 1).FullName analyze --upload-local-config
+
+        Write-Host "Removing Polaris CLI"
+        Remove-Item -Recurse -Force $polarisCliUnzipPath
+
 branding:
   icon: 'shield'
   color: 'purple'
