@@ -13,6 +13,13 @@ inputs:
   access_token:
     description: 'Polaris access token'
     required: true
+  windows_install_into_temp:
+    description: |
+      Set to "true" to enable
+      Windows Only: Should Coverity on Polaris be installed into a temporary folder in TEMP
+      Normal github private runners only have 14GB of space, if you have a huge repository, or build big binaries, you might run out of space on the scratch disk.
+      There is more space available on the system disk where the TEMP location is.
+    required: false
 ```
 
 ## Usage
@@ -44,7 +51,7 @@ jobs:
             dotnet restore
 
         - name: Static application security testing
-          uses: visma-prodsec/coverity-on-polaris-workflow@v1
+          uses: visma-prodsec/coverity-on-polaris-workflow@v2.1
           with:
             api_url: ${{ vars.COVERITY_ON_POLARIS_API_URL }}
             access_token: ${{ secrets.COVERITY_ON_POLARIS_ACCESS_TOKEN }}
@@ -79,8 +86,9 @@ jobs:
           run: dotnet restore
 
         - name: Static application security testing
-          uses: visma-prodsec/coverity-on-polaris-workflow@v1
+          uses: visma-prodsec/coverity-on-polaris-workflow@v2.1
           with:
             api_url: ${{ vars.COVERITY_ON_POLARIS_API_URL }}
             access_token: ${{ secrets.COVERITY_ON_POLARIS_ACCESS_TOKEN }}
+            windows_install_into_temp: true
 ```
