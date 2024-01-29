@@ -10,6 +10,13 @@ inputs:
   access_token:
     description: 'Polaris access token'
     required: true
+  windows_install_into_temp:
+    description: |
+      Set to "true" to enable
+      Windows Only: Should Coverity on Polaris be installed into a temporary folder in TEMP
+      Normal github private runners only have 14GB of space, if you have a huge repository, or build big binaries, you might run out of space on the scratch disk.
+      There is more space available on the system disk where the TEMP location is.
+    required: false
 
 runs:
   using: 'composite'
@@ -33,12 +40,27 @@ runs:
         echo Removing Polaris CLI
         rm -rf /tmp/polari_cli
 
+    # Creates a new directory in TEMP, and sets POLARIS_HOME to be that directory
+    #  this should install coverity on polaris into that directory instead of the current working directory
+    - if: ${{ 'true' == inputs.windows_install_into_temp && runner.os == 'Windows' }}
+      shell: pwsh
+      run: |
+        function New-TemporaryDirectory {
+            $parent = [System.IO.Path]::GetTempPath()
+            $name = [System.IO.Path]::GetRandomFileName()
+            New-Item -ItemType Directory -Path (Join-Path $parent $name)
+        }
+        $tempdir = New-TemporaryDirectory
+
+        echo "POLARIS_HOME=$tempdir" >> $env:GITHUB_ENV
+
     - if: runner.os == 'Windows'
       shell: pwsh
       env:
         DOTNET_NOLOGO: 1
         DOTNET_CLI_TELEMETRY_OPTOUT: 1
         POLARIS_ACCESS_TOKEN: ${{ inputs.access_token }}
+        GIT_BRANCH: ${{ github.ref_name }}
       run: |
         Write-Host "Downloading Polaris CLI"
         $polarisCliZipPath = Join-Path $env:TEMP "polaris_cli-win64.zip"
