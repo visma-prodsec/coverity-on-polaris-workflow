@@ -5,7 +5,7 @@ inputs:
   api_url:
     description: |
       Coverity on Polaris API URL
-      Usually something along the lines of https://{instance_name}.polaris.synopsys.com
+      Usually something along the lines of https://{instance_name}.cop.blackduck.com
     required: true
   access_token:
     description: 'Polaris access token'
